@@ -12,4 +12,7 @@ export class BurgerDto {
 
   @ApiProperty()
   additionals: string
+
+  @ApiProperty()
+  status?: 'ACTIVATE' | 'INACTIVATE'
 }

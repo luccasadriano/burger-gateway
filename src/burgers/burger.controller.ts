@@ -1,11 +1,20 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common'
 import { OnModuleInit } from '@nestjs/common'
 import { Client, ClientKafka, Transport } from '@nestjs/microservices'
 import { ApiBody } from '@nestjs/swagger'
 import { Partitioners } from 'kafkajs'
 import { Observable } from 'rxjs'
 import { BurgerDto } from 'src/dtos/burger.dto'
-import { IBurger } from './types/burger.interface'
+import { IBurger, IburgerData } from './types/burger.interface'
 
 @Controller('burgers')
 export class BurgerController implements OnModuleInit {
@@ -28,7 +37,7 @@ export class BurgerController implements OnModuleInit {
   public client: ClientKafka
 
   onModuleInit() {
-    const requestPatters = ['find-all-burger', 'find-burger']
+    const requestPatters = ['find-all-burger', 'find-burger', 'mount-burger']
 
     requestPatters.forEach(async (pattern) => {
       this.client.subscribeToResponseOf(pattern)
@@ -37,23 +46,51 @@ export class BurgerController implements OnModuleInit {
   }
 
   @Get()
-  index(): Observable<IBurger[]> {
+  @ApiBody({ type: BurgerDto })
+  index(): Observable<IburgerData[]> {
     return this.client.send('find-all-burger', {})
   }
 
   @Get(':id')
-  find(@Param('id') id: number): Observable<IBurger> {
+  @ApiBody({ type: BurgerDto })
+  find(@Param('id') id: number): Observable<IburgerData> {
     return this.client.send('find-burger', id)
   }
 
-  // @Post('v1')
-  // @ApiBody({ type: BurgerDto })
-  // create1(@Body() mountBurger: IBurger): Observable<IBurger> {
-  //   return this.client.send('mount-burger', mountBurger)
-  // }
   @Post()
   @ApiBody({ type: BurgerDto })
-  create(@Body() mountBurger: IBurger) {
-    return this.client.emit('mount-burger', mountBurger)
+  create(@Body() mountBurger: IBurger): Observable<IBurger> {
+    return this.client.send('mount-burger', mountBurger)
+  }
+
+  @Put(':id')
+  @ApiBody({ type: BurgerDto })
+  update(
+    @Param('id') id: number,
+    @Body() { additionals, breads, burgers, ingredients }: IBurger,
+  ) {
+    const payload = {
+      breads,
+      burgers,
+      ingredients,
+      additionals,
+      id,
+    }
+    return this.client.emit('update-burger', payload)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.client.emit('delete-burger', id)
+  }
+
+  @Patch(':id/activate')
+  activate(@Param('id') id: number) {
+    return this.client.emit('activate-burger', id)
+  }
+
+  @Patch(':id/inactivate')
+  inactivate(@Param('id') id: number) {
+    return this.client.emit('inactivate-burger', id)
   }
 }
