@@ -13,7 +13,7 @@ import { Client, ClientKafka, Transport } from '@nestjs/microservices'
 import { ApiBody } from '@nestjs/swagger'
 import { Partitioners } from 'kafkajs'
 import { Observable } from 'rxjs'
-import { BurgerDto } from 'src/dtos/burger.dto'
+import { BurgerDto } from 'src/burgers/dtos/burger.dto'
 import { IBurger, IburgerData } from './types/burger.interface'
 
 @Controller('burgers')
