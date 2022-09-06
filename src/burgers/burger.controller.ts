@@ -14,7 +14,7 @@ import { ApiBody } from '@nestjs/swagger'
 import { Partitioners } from 'kafkajs'
 import { Observable } from 'rxjs'
 import { BurgerDto } from 'src/burgers/dtos/burger.dto'
-import { IBurger, IburgerData } from './types/burger.interface'
+import { IBurger, IburgerData, IMountburger } from './types/burger.interface'
 
 @Controller('burgers')
 export class BurgerController implements OnModuleInit {
@@ -59,7 +59,7 @@ export class BurgerController implements OnModuleInit {
 
   @Post()
   @ApiBody({ type: BurgerDto })
-  create(@Body() mountBurger: IBurger): Observable<IBurger> {
+  create(@Body() mountBurger: IMountburger): Observable<IBurger> {
     return this.client.send('mount-burger', mountBurger)
   }
 
